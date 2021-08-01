@@ -1,0 +1,76 @@
+---
+- name: "Local workstation setup"
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+
+    - name: Install prerequisites
+      apt:
+        name: ["apt-transport-https", "gnupg2"]
+        state: present
+
+    - name: Add HashiCorp apt key
+      apt_key:
+        url: https://apt.releases.hashicorp.com/gpg
+        state: present
+
+    - name: Add Nodesource apt key.
+      apt_key:
+        url: https://keyserver.ubuntu.com/pks/lookup?op=get&fingerprint=on&search=0x1655A0AB68576280
+        id: "68576280"
+        state: present
+
+    - name: Add HashiCorp repository
+      apt_repository:
+        repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+        state: present
+        filename: hashicorp
+
+    - name: Add NodeSource repositories for Node.js.
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb https://deb.nodesource.com/node_14.x {{ ansible_distribution_release }} main"
+        - "deb-src https://deb.nodesource.com/node_14.x {{ ansible_distribution_release }} main"
+
+    - name: "Install local utilities"
+      apt:
+        name:
+          [
+            "git",
+            "neovim",
+            "docker.io",
+            "docker-compose",
+            "openconnect",
+            "vagrant",
+            "packer",
+            "terraform",
+            "neofetch",
+            "htop",
+            "shellcheck",
+            "curl",
+            "wget",
+            "net-tools",
+            "pwgen",
+            "jq",
+            "ripgrep",
+            "fzf",
+            "cowsay",
+            "lolcat",
+            "whois",
+            "vault",
+            "nodejs"
+          ]
+        state: present
+        update_cache: true
+
+    - name: Install n node manager
+      community.general.npm:
+        name: n
+        global: yes
+
+    - name: Install latest Node.js LTS
+      shell: n lts
+
